@@ -1,0 +1,462 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+
+	<title>[UDM] CSS Generator</title>
+
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+
+
+
+
+	<!-- ### the generator uses this configuration file ### -->
+	<script type="text/javascript" src="udm-custom.js"></script>
+	
+	
+	
+	
+	
+
+	<!-- ULTIMATE DROP DOWN MENU Version 4.6 by UDM -->
+	<!-- http://www.udm4.com/ -->
+	<script type="text/javascript" src="udm-control.js"></script>
+	<script type="text/javascript" src="udm-style.js"></script>
+
+	<style type="text/css">
+
+	html,body {
+		margin:0;
+		padding:0
+		}
+	body {
+		background-color:#ffe;
+		font-family:verdana,helvetica,sans-serif;
+		font-size:90%;
+		color:#410;
+		}
+	abbr {
+		font-style:normal;
+		border-bottom:1px dotted #e70;
+		cursor:default;
+		}
+
+	#heading {
+		border-bottom:2px dotted #999;
+		background-color:#fff;
+		padding:0.7em;
+		}
+
+	h1 {
+		margin:0 0 0.2em 0;
+		font-family:helvetica,sans-serif;
+		font-size:150%;
+		color:#337533;
+		font-weight:normal;
+		}
+
+	p {
+		margin:0 0 0.2em 0;
+		line-height:140%;
+		}
+
+	#cssGeneratorForm {
+		margin:1.4em 1em 1em 1em;
+		}
+
+	fieldset {
+		border:1px solid #410;
+		margin-bottom:0.5em;
+		padding:0.5em;
+		margin-right:0.2em;
+		width:95%;
+		}
+	.controls {
+		width:auto;
+		height:6em;
+		float:left;
+		}
+	.controls div {
+		margin-bottom:0.5em;
+		}
+	#plainField {
+		float:left;
+		clear:both;
+		}
+	#colorField {
+		float:left;
+		}
+
+	legend {
+		border:1px solid #410;
+		padding:0.2em 0.5em;
+		font-weight:bold;
+		}
+
+	label {
+		display:block;
+		}
+
+	textarea {
+		background-color:#fff;
+		}
+
+	</style>
+
+</head>
+
+<body>
+
+	<div id="heading">
+
+		<h1>CSS Generator</h1>
+
+		<p>
+			This utility generates plain
+			<abbr title="Cascading Style Sheets">CSS</abbr> from
+			your javascript configuration. Copy and paste the output
+			code into <code>udm-style.css</code>, and use that <strong>instead</strong> of
+			<code>udm-style.js</code>. Please see
+			<a href="http://www.udm4.com/manual/final/noscript/"
+			>Generating a noscript stylesheet</a>
+			for details.
+		</p>
+
+		<noscript>
+			<p>
+				<strong>This generator program does not work without javascript.</strong>
+			</p>
+		</noscript>
+
+	</div>
+
+	<form id="cssGeneratorForm" action="" onsubmit="generateCSS();return false">
+
+		<fieldset class="controls">
+
+			<legend>Formatting</legend>
+
+			<label for="compact">
+				<input type="radio" name="format" id="compact" checked="checked" />
+				Compact / smaller filesize
+			</label>
+
+			<label for="readable">
+				<input type="radio" name="format" id="readable" />
+				Readable / larger filesize
+			</label>
+
+		</fieldset>
+
+		<fieldset class="controls">
+
+			<legend>Amount of code</legend>
+
+			<label for="allcss">
+				<input type="radio" name="amount" id="allcss" checked="checked"
+					onclick="document.getElementById('navname').disabled=this.checked" />
+				All CSS
+			</label>
+
+			<label for="navcss">
+				<input type="radio" name="amount" id="navcss"
+				onclick="document.getElementById('navname').disabled=!this.checked" />
+				Navbar CSS only
+			</label>
+
+		</fieldset>
+
+		<fieldset class="controls">
+
+			<legend>Navbar class name</legend>
+
+			<label>
+				<input type="text" name="navname" id="navname" value="udm"
+					onkeyup="
+						this.value=this.value.replace(/[^a-zA-Z0-9_]/g,'');
+						this.value=this.value.replace(/^([^a-zA-Z])(.*)$/g,'$2');
+						"
+				 />
+			</label>
+
+		</fieldset>
+
+		<fieldset class="controls">
+
+			<legend>Output</legend>
+
+			<label for="single">
+				<input type="radio" name="output" id="single" checked="checked" onclick="toggleColorOutput('none')" />
+				All styles together
+			</label>
+
+			<label for="separate">
+				<input type="radio" name="output" id="separate" onclick="toggleColorOutput('block')" />
+				Colors and fonts separately
+			</label>
+
+		</fieldset>
+
+		<fieldset class="controls">
+
+			<legend>Make it so</legend>
+
+			<div><input type="submit" value="Generate CSS" /></div>
+
+			<div><input type="reset" value="Reset the form"
+				onclick="
+					toggleColorOutput('none');
+					document.getElementById('navname').disabled = true;
+					"
+			 /></div>
+
+		</fieldset>
+
+		<fieldset id="plainField" style="width:96%;">
+
+			<legend>Main output</legend>
+
+			<textarea id="cssTextarea" rows="15" cols="50" wrap="off" spellcheck="false" style="width:96%;height:75%;"></textarea>
+
+		</fieldset>
+
+		<fieldset id="colorField" style="width:44%;display:none;">
+
+			<legend>Colors and fonts output</legend>
+
+			<textarea id="colorTextarea" rows="15" cols="50" wrap="off" spellcheck="false" style="width:96%;height:75%;"></textarea>
+
+		</fieldset>
+
+	</form>
+
+	<script type="text/javascript">
+
+	window.onload = function()
+	{
+		//make sure the right radios are check on refresh
+		document.getElementById('compact').checked = true;
+		document.getElementById('allcss').checked = true;
+		document.getElementById('single').checked = true;
+		//document.getElementById('domjs').checked = true;
+
+		//disable the class name entry
+		document.getElementById('navname').disabled = true;
+		//reset its value
+		document.getElementById('navname').value = 'udm';
+	}
+
+	//toggle display of colour field
+	function toggleColorOutput(areaDisplay)
+	{
+		document.getElementById('colorField').style.display = areaDisplay;
+		document.getElementById('plainField').style.width = (areaDisplay=='none') ? '96%' : '44%';
+	}
+
+	//check for nav rules
+	function checkNavStyles(navCSS)
+	{
+		//if this is a rule containing
+		if(
+			//nested ul, cover layer, shadow layer, arrow styles (including width expression),
+			//span shadow layers, select or headings, or menu item class
+			/ ul| u\\l|udmS|udmC|udmA|compatMode|span\.|select| h[\\]?[3-6]|li\./.test(navCSS)
+			&&
+			//but not taming-lists rule
+			!/list-style-type/.test(navCSS)
+			&&
+			//and not double default cursor rule
+			!/\{cursor:default \!important\;\}/.test(navCSS)
+			&&
+			//and not win/ie float hack rule
+			!/display\/\*\*\/\:block/.test(navCSS)
+			&&
+			//and not ie7 float hack
+			!/(,ul\[class\$=\"udm\"\]\.udm ul li)/.test(navCSS)
+			)
+		{
+			//return null
+			return null;
+			//alert("REMOVE:\n\n" + rule);
+		}
+
+		//otherwise
+		else
+		{
+			//return the rule
+			return navCSS;
+			//alert("LEAVE IT!:\n\n" + rule);
+		}
+
+	}
+
+	//generate CSS
+	function generateCSS()
+	{
+
+		//textarea object
+		var textarea = document.getElementById('cssTextarea');
+
+		//reset textarea
+		textarea.value = '';
+
+		//if were only outputting nav styles
+		var navOnly = document.getElementById('navcss').checked;
+
+		//if were storing color and font information separately
+		var separate = document.getElementById('separate').checked;
+		if(separate)
+		{
+			//array for storing color and font information
+			var j = -1,colorRules = [];
+
+			//colorarea object
+			var colorarea = document.getElementById('colorTextarea');
+
+			//reset color
+			colorarea.value = '';
+
+		}
+
+		//write CSS rules
+		for(i=0; i<um.rLen; i++)
+		{
+			//get rule
+			var rule = um.r[i];
+
+			//if were storing color and font information separately
+			if(separate)
+			{
+
+				//copy rule
+				colorRules[++j] = rule;
+
+				//color and font regex
+				var cfReg = /(filter|color|font-family?|(background|border)-(color|image)?):[^;}]+[;]?/ig;
+
+				//extract color and font properties
+				colorRules[++j] = rule.match(cfReg)
+
+				//if properties are not null
+				if(colorRules[j]!=null)
+				{
+					//join to form a string
+					colorRules[j]=colorRules[j].join('');
+
+					//extract rule shell
+					var ruleShell=rule;
+					if(/@media/i.test(ruleShell))
+					{
+						//double-shells
+						ruleShell=ruleShell.replace(/(@media[^{]+\{[^\{]+\{)[^}]*}/ig,'$1=~=}');
+					}
+					else
+					{
+						//single shells
+						ruleShell=ruleShell.replace(/([^\{]+\{)[^}]*}/ig,'$1=~=}');
+					}
+					//split shell into start and end
+					ruleShell=ruleShell.split('=~=');
+
+					//if color rule string is empty
+					//safari needs this check
+					if(colorRules[j]=='')
+					{
+						//nullify the rule so it doesnt get output
+						colorRules[j]=null;
+					}
+
+					//otherwise if color rule string is not empty
+					else
+					{
+						//create new rule from shell and color/font rule string
+						colorRules[j]=ruleShell[0]+colorRules[j]+ruleShell[1];
+					}
+
+				}
+
+				//remove color and font properties from original rule
+				rule = rule.replace(cfReg,'');
+
+				/*
+				alert(
+					rule // original rule
+					+"\n---------------------------------------------\n"
+					+colorRules[j] //color and font rule
+					+"\n---------------------------------------------\n"
+					+rule.replace(cfReg,'') //remove color and font information
+				);
+				*/
+
+			}
+
+			//if were only outputting nav styles
+			if(navOnly)
+			{
+				//check if this is a nav rule
+				rule = checkNavStyles(rule);
+			}
+
+			//if rule has not been nullified
+			if (rule != null)
+			{
+
+				//if were only outputting nav styles
+				if(navOnly)
+				{
+					//change class name to specified
+					var navName = document.getElementById('navname').value;
+					rule = rule.replace(/([\.\"])udm([^A-Za-z])/g,'$1'+navName+'$2');
+				}
+
+				//convert to nicer format
+				if(document.getElementById('readable').checked)
+				{
+					rule = rule.replace(/{/g,' {\n\t');
+					rule = rule.replace(/;/g,';\n\t');
+				}
+
+				//write rule to textarea
+				textarea.value += rule + '\n';
+			}
+
+			//if were storing color and font information separately
+			//and were only outputting nav styles
+			if(separate && navOnly)
+			{
+				//check if this is a nav rule
+				colorRules[j] = checkNavStyles(colorRules[j]);
+			}
+
+			//if were storing color and font information separately
+			//and color rule is not null
+			if(separate && colorRules[j] != null)
+			{
+				//if were only outputting nav styles
+				if(navOnly)
+				{
+					//change class name to specified
+					navName = document.getElementById('navname').value;
+					colorRules[j] = colorRules[j].replace(/([\.\"])udm([^A-Za-z])/g,'$1'+navName+'$2');
+				}
+
+				//convert to nicer format
+				if(document.getElementById('readable').checked)
+				{
+					colorRules[j] = colorRules[j].replace(/{/g,' {\n\t');
+					colorRules[j] = colorRules[j].replace(/;/g,';\n\t');
+				}
+
+				//write rule to colorarea
+				colorarea.value += colorRules[j] + '\n';
+			}
+
+		}
+
+	}
+
+	</script>
+
+</body>
+</html>

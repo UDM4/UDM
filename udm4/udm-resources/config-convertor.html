@@ -1,0 +1,693 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+
+	<title>[UDM] Configuration Convertor</title>
+
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+
+
+
+
+	<!-- ### the generator uses this configuration file ### -->
+	<script type="text/javascript" src="udm-custom.js"></script>
+	
+	
+	
+	
+	
+
+	<style type="text/css">
+
+	html,body {
+		margin:0;
+		padding:0
+		}
+	body {
+		background-color:#ffe;
+		font-family:verdana,helvetica,sans-serif;
+		font-size:90%;
+		color:#410;
+		}
+	abbr {
+		font-style:normal;
+		border-bottom:1px dotted #e70;
+		cursor:default;
+		}
+
+	#heading {
+		border-bottom:2px dotted #999;
+		background-color:#fff;
+		padding:0.7em;
+		}
+
+	h1 {
+		margin:0 0 0.2em 0;
+		font-family:helvetica,sans-serif;
+		font-size:150%;
+		color:#337533;
+		font-weight:normal;
+		}
+
+	p {
+		margin:0 0 0.2em 0;
+		line-height:140%;
+		}
+
+	#phpGeneratorForm {
+		margin:1.4em 1em 1em 1em;
+		}
+
+	fieldset {
+		border:1px solid #410;
+		margin-bottom:0.5em;
+		padding:0.5em;
+		margin-right:0.2em;
+		width:95%;
+		}
+	.controls {
+		width:auto;
+		height:6em;
+		float:left;
+		}
+	.controls div {
+		margin-bottom:0.5em;
+		}
+	#codeField {
+		float:left;
+		clear:both;
+		}
+
+	legend {
+		border:1px solid #410;
+		padding:0.2em 0.5em;
+		font-weight:bold;
+		}
+
+	label {
+		display:block;
+		}
+
+	textarea {
+		background-color:#fff;
+		width:96%;
+		height:75%;
+		}
+
+	</style>
+
+</head>
+
+<body>
+
+	<div id="heading">
+
+		<h1>Configuration Convertor</h1>
+
+		<p>
+			This utility converts your javascript configuration file
+			into server-side code.
+			Copy and paste the output code into
+			the relevant server-side configuration file,
+			to <strong>replace</strong> what's already there. Please see
+			<a href="http://www.udm4.com/manual/depth/conf/"
+			>Choosing a configuration language</a>
+			for details.
+		</p>
+
+		<noscript>
+			<p>
+				<strong>This generator program does not work without javascript.</strong>
+			</p>
+		</noscript>
+
+	</div>
+
+	<script type="text/javascript">
+
+	//globals
+	var textarea, output, outlang = 'php';
+
+	//reset form onload
+	window.onload = function()
+	{
+		//textarea object
+		textarea = document.getElementById('codeTextarea');
+
+		//clear text area
+		textarea.value = '';
+
+		//check the php radio by default
+		document.getElementById('lang-php').checked = true;
+	};
+
+	//check for undefined new variables
+	if(typeof um.reset=='undefined') { um.reset=['yes','yes','yes']; }
+	if(typeof um.hstrip=='undefined') { um.hstrip=['none','yes']; }
+	if(typeof um.reset[3]=='undefined') { um.reset[3]='no'; }
+	if(typeof um.trigger=='undefined') { um.trigger=''; }
+
+	//names of arrays
+	var arrayNames = [
+		'orientation',//0
+		'list',//1
+		'behaviors',//2
+		'reset',//3
+		'hstrip',//4
+		'keys',//5
+		'speech',//6
+		'navbar',//7
+		'items',//8
+		'menus',//9
+		'menuItems',//10
+		'menuClasses',//11
+		'itemClasses'//12
+		];
+
+	//configuration file comments
+	var comments = [];
+
+	comments['orientation'] = [
+		'navbar orientation',
+		' alignment ["vertical"|"horizontal"|"popup"|"expanding"]',
+		' h align ["left"|"right"]',
+		' v align ["top"|"bottom"]',
+		' positioning ["relative"|"absolute"|"fixed"|"allfixed"]',
+		' x position ["em"|"ex"|"px"|"0"]',
+		' y position ["em"|"ex"|"px"|"0"]',
+		' z order ["0" to "10000"] (menu takes 20000 headroom)'
+		];
+
+	comments['list'] = [
+		'navbar list output',
+		' horizontal overflow ["rigid"|"flexible"]',
+		' -SPARE-',
+		' -SPARE-'
+		];
+
+	comments['behaviors'] = [
+		'menu behaviors',
+		' open timer ["milliseconds"|"0"]',
+		' close timer ["milliseconds"|"never"|"0"]',
+		' reposition menus to stay inside the viewport ["yes"|"no"]',
+		' manage windowed controls for win/ie ["default","hide","iframe","none"]'
+		];
+
+	comments['reset'] = [
+		'reset behaviors',
+		' reset from document mouse click ["yes"|"no"]',
+		' reset from window resize ["yes"|"no"]',
+		' reset from text resize ["yes"|"no"]',
+		' reset after following link ["yes"|"no"]'
+		];
+
+	comments['hstrip'] = [
+		'horizontal continuation strip',
+		' background ["color"|"#hex"|"rgb()"|"image.gif"|"none"]',
+		' copy item margin-right to margin-bottom ["yes"|"no"]'
+		];
+
+	comments['keys'] = [
+		'keyboard navigation',
+		' up ["n"] ("38" = up arrow key)',
+		' right ["n"] ("39" = right arrow key)',
+		' down ["n"] ("40" = down arrow key)',
+		' left ["n"] ("37" = left arrow key)',
+		' hotkey ["n"] ("119" = F8)',
+		' hotkey modifier ["none"|"shiftKey"|"ctrlKey"|"altKey"|"metaKey"]',
+		' escape ["n"|"none"] ("27" = escape key)',
+		' exit focus ["js-expression"]'
+		];
+
+	comments['speech'] = [
+		'speech output',
+		' asynchronous speech ["yes"|"no"]',
+		' buffer length ["milliseconds"|"0"]',
+		' reading speed ["-10" to "10"]',
+		' read title attributes ["yes"|"no"]',
+		' vocabulary'
+		];
+
+	comments['navbar'] = [
+		'styles which apply to the navbar',
+		' nav -> menu x-offset (+-)["n" pixels]',
+		' nav -> menu y-offset (+-)["n" pixels]',
+		' width ["em"|"ex"|"px"] (vertical navbar only - horizontal navbar items have "auto" width) ("%" doesnt work right)'
+		];
+
+	comments['items'] = [
+		'styles which apply to each navbar item',
+		' margin between items ["n" pixels]',
+		' border size ["n" pixels] (single value only)',
+		' border collapse ["collapse"|"separate"] (only applies when margin = "0")',
+		' border colors ["color"|"#hex"|"rgb()"] (single, double or four values)',
+		' border styles ["solid"|"double"|"dotted"|"dashed"|"groove"|"ridge"|"inset"|"outset"] (single, double or four values; be careful with using "none")',
+		' hover/focus border colors ["color"|"#hex"|"rgb()"] (single, double or four values)',
+		' hover/focus border styles ["solid"|"double"|"dotted"|"dashed"|"groove"|"ridge"|"inset"|"outset"] (single, double or four values; be careful with using "none")',
+		' visited border colors ["color"|"#hex"|"rgb()"] (single, double or four values)',
+		' visited border styles ["solid"|"double"|"dotted"|"dashed"|"groove"|"ridge"|"inset"|"outset"] (single, double or four values; be careful with using "none")',
+		' left/right padding ["n" pixels] (single value only)',
+		' top/bottom padding ["n" pixels] (single value only)',
+		' background ["color"|"#hex"|"rgb()"|"image.gif"]',
+		' hover/focus background ["color"|"#hex"|"rgb()"|"image.gif"]',
+		' visited background ["color"|"#hex"|"rgb()"|"image.gif"]',
+		' font size ["em"|"ex"|"%"|"px"|"pt"|"absolute-size"|"relative-size"]',
+		' font family ["font1,font2,font3"] (always end with a generic family name)',
+		' font weight ["normal"|"bold"|"bolder"|"lighter|"100" to "900"]',
+		' text decoration ["none"|"underline"|"overline"|"line-through"]',
+		' text-align ["left"|"right"|"center"]',
+		' color ["color"|"#hex"|"rgb()"]',
+		' hover/focus color ["color"|"#hex"|"rgb()"]',
+		' visited color ["color"|"#hex"|"rgb()"]',
+		' font-style ["normal"|"italic"|"oblique"]',
+		' hover/focus font-style ["normal"|"italic"|"oblique"]',
+		' visited font-style ["normal"|"italic"|"oblique"]',
+		' additional link CSS (careful!)',
+		' additional hover/focus CSS (careful!)',
+		' additional visited CSS (careful!)',
+		' menu indicator character/image ["text"|"image.gif"|"none"]',
+		' menu indicator rollover character/image ["text"|"image.gif"|"none"] (must be same type)',
+		' clipping width of indicator image ["n" pixels] (only when using image arrows)',
+		' alt text of indicator image ["text"] (only when using image arrows)'
+		];
+
+	comments['menus'] = [
+		'styles which apply to each menu',
+		' menu -> menu x-offset (+-)["n" pixels]',
+		' menu -> menu y-offset (+-)["n" pixels]',
+		' border size ["n" pixels] (single value only)',
+		' border colors ["color"|"#hex"|"rgb()"] (single, double or four values)',
+		' border styles ["solid"|"double"|"dotted"|"dashed"|"groove"|"ridge"|"inset"|"outset"] (single, double or four values; be careful with using "none")',
+		' width ["em"|"ex"|"px"]',
+		' padding ["n" pixels] (single value only)',
+		' background ["color"|"#hex"|"rgb()"|"image.gif"]',
+		' additional menu CSS (careful!) (you can use a transition here but *not* a static filter)',
+		' shadow background ["color"|"#hex"|"rgb()"|"image.gif"|"none"]',
+		' shadow offset (+-)["em"|"ex"|"px"|"%"|"0"]',
+		' additional shadow layer CSS (if you use a Microsoft.Shadow filter here then Win/IE5.5+ will do that *instead* of default shadow)'
+		];
+
+	comments['menuItems'] = [
+		'styles which apply to each menu item',
+		' margin around items ["n" pixels] (single value only; margins are like table cellspacing)',
+		' border size ["n" pixels] (single value only)',
+		' border collapse ["collapse"|"separate"] (only applies when margin = "0")',
+		' border colors ["color"|"#hex"|"rgb()"] (single, double or four values)',
+		' border styles ["solid"|"double"|"dotted"|"dashed"|"groove"|"ridge"|"inset"|"outset"] (single, double or four values; be careful with using "none")',
+		' hover/focus border colors ["color"|"#hex"|"rgb()"] (single, double or four values)',
+		' hover/focus border styles ["solid"|"double"|"dotted"|"dashed"|"groove"|"ridge"|"inset"|"outset"] (single, double or four values; be careful with using "none")',
+		' visited border colors ["color"|"#hex"|"rgb()"] (single, double or four values)',
+		' visited border styles ["solid"|"double"|"dotted"|"dashed"|"groove"|"ridge"|"inset"|"outset"] (single, double or four values; be careful with using "none")',
+		' left/right padding ["n" pixels] (single value only)',
+		' top/bottom padding ["n" pixels] (single value only)',
+		' background ["color"|"#hex"|"rgb()"|"image.gif"]',
+		' hover/focus background ["color"|"#hex"|"rgb()"|"image.gif"]',
+		' visited background ["color"|"#hex"|"rgb()"|"image.gif"]',
+		' font size ["em"|"ex"|"%"|"px"|"pt"|"absolute-size"|"relative-size"]',
+		' font family ["font1,font2,font3"] (always end with a generic family name)',
+		' font weight ["normal"|"bold"|"bolder"|"lighter|"100" to "900"]',
+		' text decoration ["none"|"underline"|"overline"|"line-through"]',
+		' text-align ["left"|"right"|"center"]',
+		' color ["color"|"#hex"|"rgb()"]',
+		' hover/focus color ["color"|"#hex"|"rgb()"]',
+		' visited color ["color"|"#hex"|"rgb()"]',
+		' font-style ["normal"|"italic"|"oblique"]',
+		' hover/focus font-style ["normal"|"italic"|"oblique"]',
+		' visited font-style ["normal"|"italic"|"oblique"]',
+		' additional link CSS (careful!)',
+		' additional hover/focus CSS (careful!)',
+		' additional visited CSS (careful!)',
+		' submenu indicator character/image ["text"|"image.gif"|"none"]',
+		' submenu indicator rollover character/image ["text"|"image.gif"|"none"] (must be the same type)',
+		' clipping width of indicator image ["n" pixels] (only when using image arrows)',
+		' alt text of indicator image ["text"] (only when using image arrows)'
+		];
+
+	comments['menuClasses'] = [
+		'classes which apply to menus',
+		' border colors ["color"|"#hex"|"rgb()"]',
+		' border styles ["solid"|"double"|"dotted"|"dashed"|"groove"|"ridge"|"inset"|"outset"] (single, double or four values; be careful with using "none")',
+		' width ["em"|"ex"|"px"]',
+		' background ["color"|"#hex"|"rgb()"|"image.gif"]',
+		' additional menu CSS (careful!) (you can use a transition here but *not* a static filter)',
+		' shadow background ["color"|"#hex"|"rgb()"|"image.gif"|"none"] (this wont show up at all if default shadow is "none", so if thats what you want, set default shadow to "transparent" or default offset to "0")',
+		' shadow offset (+-)["em"|"ex"|"px"|"%"|"0"]',
+		' additional shadow layer CSS (if you use a Microsoft.Shadow filter here then Win/IE5.5+ will do that *instead* of default shadow)'
+		];
+
+	comments['itemClasses'] = [
+		'classes which apply to menu items',
+		' border colors ["color"|"#hex"|"rgb()"] (single, double or four values)',
+		' border styles ["solid"|"double"|"dotted"|"dashed"|"groove"|"ridge"|"inset"|"outset"] (single, double or four values; be careful with using "none")',
+		' hover/focus border colors ["color"|"#hex"|"rgb()"] (single, double or four values)',
+		' hover/focus border styles ["solid"|"double"|"dotted"|"dashed"|"groove"|"ridge"|"inset"|"outset"] (single, double or four values; be careful with using "none")',
+		' visited border colors ["color"|"#hex"|"rgb()"] (single, double or four values)',
+		' visited border styles ["solid"|"double"|"dotted"|"dashed"|"groove"|"ridge"|"inset"|"outset"] (single, double or four values; be careful with using "none")',
+		' background ["color"|"#hex"|"rgb()"|"image.gif"]',
+		' hover/focus background ["color"|"#hex"|"rgb()"|"image.gif"]',
+		' visited background ["color"|"#hex"|"rgb()"|"image.gif"]',
+		' font size ["em"|"ex"|"%"|"px"|"pt"|"absolute-size"|"relative-size"]',
+		' font family ["font1,font2,font3"] (always end with a generic family name)',
+		' font weight ["normal"|"bold"|"bolder"|"lighter|"100" to "900"]',
+		' text decoration ["none"|"underline"|"overline"|"line-through"]',
+		' text-align ["left"|"right"|"center"]',
+		' color ["color"|"#hex"|"rgb()"]',
+		' hover/focus color ["color"|"#hex"|"rgb()"]',
+		' visited color ["color"|"#hex"|"rgb()"]',
+		' font-style ["normal"|"italic"|"oblique"]',
+		' hover/focus font-style ["normal"|"italic"|"oblique"]',
+		' visited font-style ["normal"|"italic"|"oblique"]',
+		' additional link CSS (careful!)',
+		' additional hover/focus CSS (careful!)',
+		' additional visited CSS (careful!)',
+		' submenu indicator character/image ["text"|"image.gif"|"none"] (must be the same type as default submenu indicator)',
+		' submenu indicator rollover character/image ["text"|"image.gif"|"none"] (must be the same type)',
+		' alt text of indicator image  ["text"] (only when using image arrow)'
+		];
+
+	//set output language
+	function setOutputLang(lang)
+	{
+		outlang = lang;
+	};
+
+	//parse values for inclusion
+	function parseValue(jsVal,jsComment,isFinal,sQuotes)
+	{
+		//if converting to and using single quotes
+		if(sQuotes)
+		{
+			//convert existing single-quotes to double-quotes
+			jsVal = jsVal.replace(/'/g,'"');
+
+			//add comma after value unless it's the last one
+			//then add the comment after that -
+			//with two tabs for strings less than 5 characters (or 6 for the last one),
+			//or a single space for strings greater than 12 characters,
+			//or a single tab
+			jsVal = "\t'" + jsVal + "'" + ((isFinal) ? "" : ",") + ((jsVal.length<(isFinal?6:5)) ? "\t\t" : (jsVal.length>12) ? " " : "\t") + jsComment + "\n";
+		}
+
+		//if not using single quotes
+		else
+		{
+			//add comma after value unless it's the last one
+			//then add the comment after that -
+			//with two tabs for strings less than 5 characters (or 6 for the last one),
+			//or a single space for strings greater than 12 characters,
+			//or a single tab
+			jsVal = '\t"' + jsVal + '"' + ((isFinal) ? '' : ',') + ((jsVal.length<(isFinal?6:5)) ? '\t\t' : (jsVal.length>12) ? ' ' : '\t') + jsComment + '\n';
+		}
+
+		//return value
+		return jsVal;
+	};
+
+	//create array
+	function createArray(key,classInfo)
+	{
+			//convert to single-quote output for: php
+			//which is passed as a boolean to parseValue method
+			var convert = outlang == 'php';
+
+			//array comment
+			output += "//" + comments[arrayNames[key]][0] + "\n";
+
+			//if this is a regular array
+			if(classInfo == null)
+			{
+				//open array
+				switch(outlang)
+				{
+					case 'asp' :
+						output += 'um.' + arrayNames[key] + ' = [\n';
+						break;
+
+					default :
+						output += "$um['" + arrayNames[key] + "'] = array(\n";
+				}
+
+				//for each array value
+				for(var j=0; j<um[arrayNames[key]].length; j++)
+				{
+					//if array item is not undefined
+					//this is for the benefit of opera 5
+					//which creates undefined array items from trailing commas
+					if(typeof um[arrayNames[key]][j]!='undefined')
+					{
+						//write parsed value into output array
+						output += parseValue(um[arrayNames[key]][j], "//" + comments[arrayNames[key]][(j+1)], j==(um[arrayNames[key]].length-1), convert);
+					}
+				}
+			}
+
+			//else this is a class array
+			else
+			{
+				//open array
+				switch(outlang)
+				{
+					case 'asp' :
+						output += 'um.' + arrayNames[key] + '["' + classInfo + '"] = [\n';
+						break;
+
+					default :
+						output += "$um['" + arrayNames[key] + "']['" + classInfo + "'] = array(\n";
+				}
+
+				//for each array value
+				for(j=0; j<um[arrayNames[key]][classInfo].length; j++)
+				{
+					//if array item is not undefined
+					//this is for the benefit of opera 5
+					//which creates undefined array items from trailing commas
+					if(typeof um[arrayNames[key]][classInfo][j]!='undefined')
+					{
+						//write parsed value into output array
+						output += parseValue(um[arrayNames[key]][classInfo][j], "//" + comments[arrayNames[key]][(j+1)], j==(um[arrayNames[key]][classInfo].length-1), convert);
+					}
+				}
+			}
+
+			//close array
+			switch(outlang)
+			{
+				case 'asp' :
+					output += '\t];\n\n\n';
+					break;
+
+				default :
+					output += "\t);\n\n\n";
+			}
+	};
+
+	//create server-side code
+	function createServerCode()
+	{
+		//start compiling string
+		switch(outlang)
+		{
+			case 'asp' :
+				output = "<%\n";
+				break;
+
+			default :
+				output = "<?php\n";
+		}
+
+		//open copyright message
+		output += "// UDMv4.6 //\n"
+		+ "/***************************************************************/\n";
+
+		//add core um declarations
+		switch(outlang)
+		{
+			case 'asp' :
+				output += "var um={'menuClasses':[],'itemClasses':[],'menuCode':[]};\n";
+				break;
+
+			default :
+				output += "$um=array('menuClasses'=>array(),'itemClasses'=>array(),'menuCode'=>array());\n";
+		}
+
+		//rest of copyright message
+		output += "/***************************************************************\\\n\n"
+		+ "  ULTIMATE DROP DOWN MENU Version 4.6 by UDM\n"
+		+ "  http://www.udm4.com/\n\n"
+		+ "  This script may not be used or distributed without license\n\n"
+		+ "\***************************************************************/\n\n\n";
+
+		//core configuration
+		output += "/***************************************************************\\\n"
+		+ " * CORE CONFIGURATION\n"
+		+ "\\***************************************************************/\n\n\n";
+
+		//baseSRC and trigger element
+		switch(outlang)
+		{
+			case 'asp' :
+				output += "//http path to images folder (from the web root, not the server root)\n"
+					+ 'um.baseSRC = "' + um.baseSRC + '";\n\n\n';
+				output += "//initialization trigger element [\"id\"]\n"
+					+ 'um.trigger = "' + um.trigger + '";\n\n\n';
+				break;
+
+			default :
+				output += "//http path to images folder (from the web root, not the server root)\n"
+					+ "$um['baseSRC'] = '" + um.baseSRC + "';\n\n\n";
+				output += "//initialization trigger element [\"id\"]\n"
+					+ "$um['trigger'] = '" + um.trigger + "';\n\n\n";
+		}
+
+		//run through core settings arrays
+		for(var i=0; i<5; i++)
+		{
+			//create arrays
+			createArray(i,null);
+		}
+
+		//module settings
+		output += "/***************************************************************\\\n"
+		+ " * MODULE SETTINGS\n"
+		+ "\\***************************************************************/\n\n\n";
+
+		//if the keyboard module array is present
+		if(typeof um.keys != 'undefined')
+		{
+			//create array
+			createArray(5,null);
+		}
+
+		//if the speech module array is present
+		if(typeof um.speech != 'undefined')
+		{
+			//create array
+			createArray(6,null);
+		}
+
+		//navbar default styles
+		output += "/***************************************************************\\\n"
+		+ " * NAVBAR DEFAULT STYLES\n"
+		+ "\\***************************************************************/\n\n\n";
+
+		//run through navbar arrays
+		for(i=7; i<9; i++)
+		{
+			//create arrays
+			createArray(i,null);
+		}
+
+		//menu default styles
+		output += "/***************************************************************\\\n"
+		+ " * MENU DEFAULT STYLES\n"
+		+ "\\***************************************************************/\n\n\n";
+
+		//run through navbar arrays
+		for(i=9; i<11; i++)
+		{
+			//create arrays
+			createArray(i,null);
+		}
+
+		//menu classes
+		output += "/***************************************************************\\\n"
+		+ " * MENU CLASSES\n"
+		+ "\\***************************************************************/\n\n\n";
+
+		//count menu classes
+		var count = 0;
+		for(i in um.menuClasses) { count++; }
+
+		//if there are any
+		if(count > 0)
+		{
+			//run through classes
+			for(i in um.menuClasses)
+			{
+				//create arrays
+				createArray(11,i);
+			}
+		}
+
+		//count item classes
+		count = 0;
+		for(i in um.itemClasses) { count++; }
+
+		//if there are any
+		if(count > 0)
+		{
+			//run through classes
+			for(i in um.itemClasses)
+			{
+				//create arrays
+				createArray(12,i);
+			}
+		}
+
+		//space for dynamic menus
+		output += "/***************************************************************\\\n"
+		+ " * DYNAMIC MENUS\n"
+		+ "\\***************************************************************/\n\n\n";
+
+		//finish compiling string
+		output += "/***************************************************************\\\n"
+		+ "\\***************************************************************/";
+
+		switch(outlang)
+		{
+			case 'asp' :
+				output += "\n%>";
+				break;
+
+			default :
+				output += "\n?>";
+		}
+
+		//output to textarea
+		textarea.value = output;
+
+	};
+
+	</script>
+
+	<form id="phpGeneratorForm" action="" onsubmit="createServerCode();return false" onreset="setOutputLang('php')">
+
+		<fieldset class="controls">
+
+			<legend>Output language</legend>
+
+			<label for="lang-php">
+				<input type="radio" name="lang" id="lang-php" onclick="setOutputLang('php')" checked="checked" />
+				PHP
+			</label>
+
+			<label for="lang-asp">
+				<input type="radio" name="lang" id="lang-asp" onclick="setOutputLang('asp')" />
+				ASP
+			</label>
+
+		</fieldset>
+
+		<fieldset class="controls">
+
+			<legend>Make it so</legend>
+
+			<div><input type="submit" value="Generate Code" /></div>
+			<div><input type="reset" value="Reset the form" /></div>
+
+		</fieldset>
+
+		<fieldset id="codeField" style="width:96%;">
+
+			<legend>Code output</legend>
+
+			<textarea id="codeTextarea" rows="15" cols="50" wrap="off" spellcheck="false"></textarea>
+
+		</fieldset>
+
+	</form>
+
+</body>
+</html>
